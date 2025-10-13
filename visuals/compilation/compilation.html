@@ -20,7 +20,22 @@
         </ul>
     </nav>
 
-    <section id="header"></section>
+    <section id="header">
+        <div class="match-header">
+            <div class="players">
+            <span id="player1" class="player"></span>
+            <span class="vs">vs</span>
+            <span id="player2" class="player"></span>
+            </div>
+
+            <div class="set-scores" id="setScores"></div>
+
+            <div class="event-info">
+            <span id="eventName"></span> • <span id="eventDate"></span>
+            </div>
+        </div>
+    </section>
+
 
     <section id="sum-stats">
         <svg width="1000" height="1000"></svg>
@@ -46,7 +61,7 @@
         <svg width="1000" height="800"></svg>
     </section>
 
-    <button id="save-all-sections">Export Page as PDF</button>
+    <button id="save-all-sections">Export as PDF</button>
 
     <script src="sum-stats.js"></script>
     <script src="winners.js"></script>

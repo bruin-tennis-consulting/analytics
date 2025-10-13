@@ -42,7 +42,8 @@ body {
 #sum-stats, #header {
     background-color: white;
 }
-#net-errors, #ret-cont, #serve-dist-map, #serve-error, #winner-placement {
+/*Ensures court visuals have green background*/
+#net-errors, #ret-cont, #return-place, #serve-place, #serve-dist-map, #serve-error, #winner-placement {
     background-color: #86ac91;
 }
 section {  

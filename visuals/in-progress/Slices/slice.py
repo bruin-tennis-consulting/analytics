@@ -1,5 +1,10 @@
 import numpy as np
 import pandas as pd
+import os
+
+# Adjusted output path for JSONs
+output_dir = os.path.join(os.getcwd(), "visuals/in-progress/Slices")
+os.makedirs(output_dir, exist_ok=True)
 
 def slice_place(player, path, fh_bh, exclude_times=None):
     # Load the data
@@ -77,14 +82,6 @@ def slice_place(player, path, fh_bh, exclude_times=None):
 
     # Convert win_percentage to string for display
     distribution['win_percentage'] = distribution['win_percentage'].astype(str) + '%'
-
-    # Adjust x_mapping to match the width values
-    x_mapping = {
-        'left': {'x': -100},
-        'mid': {'x': 0},
-        'right': {'x': 100}
-    }
-
     
     # Export the data as JSON
     return_place_json = slice_place.to_json(orient='records')
@@ -95,3 +92,8 @@ def slice_place(player, path, fh_bh, exclude_times=None):
 
     with open(os.path.join(output_dir, 'slice_place_dist.json'), 'w') as f:
         f.write(return_place_dist_json)
+
+player = "Rudy Quan"
+path = 'data/match-csvs/Shot_Visuals_RudyQuan_AristotelisThanos.csv'
+fh_bh = "Backhand"
+slice_place(player, path, fh_bh)

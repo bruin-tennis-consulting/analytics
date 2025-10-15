@@ -43,7 +43,7 @@ body {
     background-color: white;
 }
 /*Ensures court visuals have green background*/
-#net-errors, #ret-cont, #return-place, #serve-place, #serve-dist-map, #serve-error, #winner-placement {
+#net-errors, #ret-cont, #return-place, #serve-place, #serve-dist-map, #serve-error, #winner-placement, #slice-place {
     background-color: #86ac91;
 }
 section {  

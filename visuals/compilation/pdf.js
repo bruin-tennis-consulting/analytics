@@ -4,66 +4,41 @@ document.getElementById("save-all-sections").addEventListener("click", async () 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const pdfMargin = 20;
+    const cropPercent = 0.1; // crop 10% from each side
+
+    // Dynamic file name from loaded json
+    const response = await fetch('../../../../data/json/match_summary.json');
+    const matchData = await response.json();
+    const dateFormatted = matchData.eventDate.replace(/\//g, "_");
+    const pdfFilename = `${matchData.player1} vs ${matchData.player2} (${dateFormatted}).pdf`;
 
     const sections = Array.from(document.querySelectorAll("section"));
+    let yOffset = pdfMargin;
 
-    // Handle first section separately
-    const firstCanvas = await html2canvas(sections[0], { scale: 2 });
-    const firstImg = firstCanvas.toDataURL("image/png");
-    const firstWidth = pageWidth - 2 * pdfMargin;
-    const firstHeight = (firstCanvas.height * firstWidth) / firstCanvas.width;
-    pdf.addImage(firstImg, "PNG", pdfMargin, pdfMargin, firstWidth, firstHeight);
+    for (let i = 0; i < sections.length; i++) {
+        const canvas = await html2canvas(sections[i], { scale: 2 });
 
-    let yOffset = pdfMargin + firstHeight + pdfMargin;
-    let i = 1;
+        const cropX = canvas.width * cropPercent;
+        const cropWidth = canvas.width * (1 - 2 * cropPercent);
+        const croppedCanvas = document.createElement("canvas");
+        croppedCanvas.width = cropWidth;
+        croppedCanvas.height = canvas.height;
+        const ctx = croppedCanvas.getContext("2d");
+        ctx.drawImage(canvas, cropX, 0, cropWidth, canvas.height, 0, 0, cropWidth, canvas.height);
 
-    while (i < sections.length) {
-        let canvas1 = await html2canvas(sections[i], { scale: 2 });
-        let img1 = canvas1.toDataURL("image/png");
-        let imgWidth1 = pageWidth - 2 * pdfMargin;
+        // Fit width to page
+        const imgWidth = pageWidth - 2 * pdfMargin;
+        const imgHeight = (croppedCanvas.height * imgWidth) / croppedCanvas.width;
 
-        let remainingHeight = pageHeight - yOffset - pdfMargin;
-
-        let imgHeight1 = (canvas1.height * imgWidth1) / canvas1.width;
-
-        let secondCanvas = null;
-        let img2 = null;
-        let imgWidth2, imgHeight2;
-
-        // Check if a second section fits better
-        if (i + 1 < sections.length) {
-            secondCanvas = await html2canvas(sections[i + 1], { scale: 2 });
-            img2 = secondCanvas.toDataURL("image/png");
-            imgWidth2 = pageWidth - 2 * pdfMargin;
-            imgHeight2 = (secondCanvas.height * imgWidth2) / secondCanvas.width;
-
-            // If both fit, scale proportionally to remaining page height
-            const totalHeight = imgHeight1 + pdfMargin + imgHeight2;
-            if (totalHeight > remainingHeight) {
-                const scale = remainingHeight / totalHeight;
-                imgHeight1 *= scale;
-                imgHeight2 *= scale;
-            }
-        } else if (imgHeight1 > remainingHeight) {
-            imgHeight1 = remainingHeight; // scale down to fit page
+        // New page if visuals don't fit
+        if (yOffset + imgHeight + pdfMargin > pageHeight) {
+            pdf.addPage();
+            yOffset = pdfMargin;
         }
 
-        // Add first visual
-        pdf.addImage(img1, "PNG", pdfMargin, yOffset, imgWidth1, imgHeight1);
-        yOffset += imgHeight1 + pdfMargin;
-
-        // Add second visual if exists
-        if (img2) {
-            pdf.addImage(img2, "PNG", pdfMargin, yOffset, imgWidth2, imgHeight2);
-            yOffset += imgHeight2 + pdfMargin;
-            i += 2;
-        } else {
-            i += 1;
-        }
-
-        // Reset offset for new page if we ran out of space
-        if (i < sections.length) yOffset = pdfMargin, pdf.addPage();
+        pdf.addImage(croppedCanvas.toDataURL("image/png"), "PNG", pdfMargin, yOffset, imgWidth, imgHeight);
+        yOffset += imgHeight + pdfMargin;
     }
 
-    pdf.save("Visuals_Compilation.pdf");
+    pdf.save(pdfFilename);
 });

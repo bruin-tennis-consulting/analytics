@@ -19,7 +19,7 @@ d3.json("../../../../data/json/serve_dist.json").then(function(data) {
     svg.append("text")
         .attr("class", "title")
         .attr("x", width / 2)
-        .attr("y", yScale(-60))
+        .attr("y", yScale(-75))
         .text("Serve Distribution");
 
     svg.append("rect")

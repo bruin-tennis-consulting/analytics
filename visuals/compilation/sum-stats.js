@@ -5,7 +5,7 @@ d3.json("../../../../data/json/summary_stats.json").then(function(summary_stats)
     const avgRallyLength = summary_stats.find(d => d.Stat === "Average Rally Length")[playerNames[0]];
 
     const margin = {top: 0, right: 80, bottom: 0, left: 80},
-            width = 925 - margin.left - margin.right,
+            width = 870 - margin.left - margin.right,
             barHeight = 70,
             gapHeight = -10,
             nonRallyHeight = nonRallyData.length * barHeight - 25;

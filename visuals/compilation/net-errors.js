@@ -8,11 +8,11 @@ d3.json("../../../../data/json/net_errors.json").then(function(net_errors) {
                 .attr("preserveAspectRatio", "xMidYMid meet");
 
             const xScale = d3.scaleLinear()
-                             .domain([-275, 275])
+                             .domain([-350, 350])
                              .range([0, width]);
 
             const yScale = d3.scaleLinear()
-                             .domain([-600, 100])
+                             .domain([-600, 150])
                              .range([height, 0]);
 
             // Arrowhead marker
@@ -45,7 +45,7 @@ d3.json("../../../../data/json/net_errors.json").then(function(net_errors) {
             svg.append("text")
                .attr("class", "title")
                .attr("x", width / 2)
-               .attr("y", 60)
+               .attr("y", 100)
                .text("Net Errors");
 
             svg.append("rect")

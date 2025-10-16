@@ -9,7 +9,7 @@ d3.json("../../../../data/json/ret_contact.json").then(function(returns_ucla) {
             .attr("preserveAspectRatio", "xMidYMid meet");
 
         const xScale = d3.scaleLinear()
-                        .domain([-300, 300])
+                        .domain([-350, 350])
                         .range([0, width]);
 
         const yScale = d3.scaleLinear()
@@ -189,7 +189,7 @@ d3.json("../../../../data/json/ret_contact.json").then(function(returns_ucla) {
         });
 
         // Legend
-        const legendX = xScale(-277.5);
+        const legendX = xScale(-287.5);
         const legendYStart = 250;
 
         const legendData = [

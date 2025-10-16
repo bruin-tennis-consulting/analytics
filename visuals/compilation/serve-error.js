@@ -1,59 +1,56 @@
 d3.json("../../../../data/json/serve_error.json").then(function(serve_errors) {
-    d3.json("../../../../data/json/serve_error_dist.json").then(function(serve_errorDist) {
+  d3.json("../../../../data/json/serve_error_dist.json").then(function(serve_errorDist) {
 
-        const width = 1000;
-        const height = 800;
-        
-        const svg = d3.select("#serve-error svg")
-            .attr("viewBox", `0 0 ${width} ${height}`)
-            .attr("preserveAspectRatio", "xMidYMid meet");
+    const width = 1000;
+    const height = 800;
+    
+    const svg = d3.select("#serve-error svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("preserveAspectRatio", "xMidYMid meet");
 
-        const xScale = d3.scaleLinear()
-                            .domain([-300, 300])
-                            .range([0, width]);
+    const xScale = d3.scaleLinear()
+                        .domain([-350, 350])
+                        .range([0, width]);
 
-        const yScale = d3.scaleLinear()
-                            .domain([-100, 600])
-                            .range([height, 0]);
+    const yScale = d3.scaleLinear()
+                        .domain([-150, 600])
+                        .range([height, 0]);
 
-        // Plot title
-        svg.append("text")
-        .attr("class", "title")
-        .attr("x", width / 2)
-        .attr("y", yScale(-60))
-        .text("Serve Error Distribution");
+    svg.append("text")
+      .attr("class", "title")
+      .attr("x", width / 2)
+      .attr("y", yScale(-75)) 
+      .text("Serve Error Distribution");
 
-        svg.append("rect")
-            .attr("x", xScale(-210))
-            .attr("y", yScale(455))
-            .attr("width", xScale(210) - xScale(-210))
-            .attr("height", yScale(-25) - yScale(455))
-            .attr("fill", "#6092ce");
+    svg.append("rect")
+        .attr("x", xScale(-210))
+        .attr("y", yScale(455))
+        .attr("width", xScale(210) - xScale(-210))
+        .attr("height", yScale(-25) - yScale(455))
+        .attr("fill", "#6092ce");
 
-        const courtLines = [
-            { x1: 210, y1: -25, x2: 210, y2: 455 },
-            { x1: -210, y1: -25, x2: -210, y2: 455 },
-            { x1: 157.5, y1: -25, x2: 157.5, y2: 455 },
-            { x1: -157.5, y1: -25, x2: -157.5, y2: 455 },
-            { x1: 240, y1: 0, x2: -240, y2: 0, width: 7 },
-            { x1: 0, y1: -25, x2: 0, y2: 245 },
-            { x1: 157.5, y1: 245, x2: -157.5, y2: 245 },
-            { x1: 211.25, y1: 455, x2: -211.25, y2: 455 },
-            { x1: 0, y1: 445, x2: 0, y2: 455 }
-        ];
+    const courtLines = [
+        { x1: 210, y1: -25, x2: 210, y2: 455 },
+        { x1: -210, y1: -25, x2: -210, y2: 455 },
+        { x1: 157.5, y1: -25, x2: 157.5, y2: 455 },
+        { x1: -157.5, y1: -25, x2: -157.5, y2: 455 },
+        { x1: 240, y1: 0, x2: -240, y2: 0, width: 7 },
+        { x1: 0, y1: -25, x2: 0, y2: 245 },
+        { x1: 157.5, y1: 245, x2: -157.5, y2: 245 },
+        { x1: 211.25, y1: 455, x2: -211.25, y2: 455 },
+        { x1: 0, y1: 445, x2: 0, y2: 455 }
+    ];
 
-        svg.selectAll("line")
-            .data(courtLines)
-            .enter()
-            .append("line")
-            .attr("x1", function(d) { return xScale(d.x1); })
-            .attr("y1", function(d) { return yScale(d.y1); })
-            .attr("x2", function(d) { return xScale(d.x2); })
-            .attr("y2", function(d) { return yScale(d.y2); })
-            .attr("stroke", "white")
-            .attr("stroke-width", function(d) {
-                return d.width ? d.width : 4;
-            });
+    svg.selectAll("line")
+        .data(courtLines)
+        .enter()
+        .append("line")
+        .attr("x1", d => xScale(d.x1))
+        .attr("y1", d => yScale(d.y1))
+        .attr("x2", d => xScale(d.x2))
+        .attr("y2", d => yScale(d.y2))
+        .attr("stroke", "white")
+        .attr("stroke-width", d => d.width ? d.width : 4);
 
         // Serve error distribution labels
         const counts = [

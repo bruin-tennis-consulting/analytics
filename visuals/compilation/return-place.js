@@ -308,7 +308,7 @@ function drawReturnPlace(data_location, data_dist_location, svgSelector = "#retu
                 .attr("text-anchor", "start")
                 .attr("fill", "white")
                 .style("font-family", "'DM Sans', sans-serif")
-                .text("- Win");
+                .text("- Won");
 
             legendGroup.append("circle")
                 .attr("cx", legendX + 250)

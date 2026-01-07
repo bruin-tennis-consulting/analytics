@@ -7,14 +7,23 @@
 
 .match-header .players {
     font-size: calc(1.5vw + 1.5vh);
-    font-weight: 600;
 }
 .match-header .player {
     color: black;
 }
 .match-header .player.winner {
-    color: #1f7493ff; 
+    font-weight: 700; /* bold for winner */
 }
+
+.match-header .player:not(.winner) {
+    font-weight: 400; /* normal for loser */
+}
+
+.match-header .vs {
+    font-weight: 400
+}
+
+
 .match-header .team-name {
     font-size: calc(0.9vw + 0.5vh);
     font-weight: 400;
@@ -228,4 +237,18 @@ button{
     padding: 10px 15px;
     cursor: pointer;
     
+}
+
+#save-all-sections {
+    position: fixed;
+    bottom: 3vh;
+    right: 2vw;
+    z-index: 2000;
+}
+
+#export-report {
+    position: fixed;
+    bottom: 10vh;   /* stacks above the PDF button */
+    right: 2vw;
+    z-index: 2000;
 }

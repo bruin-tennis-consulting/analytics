@@ -16,7 +16,7 @@ document.getElementById("save-all-sections").addEventListener("click", async () 
     let yOffset = pdfMargin;
 
     for (let i = 0; i < sections.length; i++) {
-        const canvas = await html2canvas(sections[i], { scale: 2 });
+        const canvas = await html2canvas(sections[i], { scale: 1.5 });
 
         const cropX = canvas.width * cropPercent;
         const cropWidth = canvas.width * (1 - 2 * cropPercent);
@@ -36,7 +36,7 @@ document.getElementById("save-all-sections").addEventListener("click", async () 
             yOffset = pdfMargin;
         }
 
-        pdf.addImage(croppedCanvas.toDataURL("image/png"), "PNG", pdfMargin, yOffset, imgWidth, imgHeight);
+        pdf.addImage(croppedCanvas.toDataURL("image/jpeg"), "JPEG", pdfMargin, yOffset, imgWidth, imgHeight);
         yOffset += imgHeight + pdfMargin;
     }
 

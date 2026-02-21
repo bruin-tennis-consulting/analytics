@@ -126,9 +126,12 @@ document.addEventListener("DOMContentLoaded", () => {
         await new Promise(resolve => {
           img.onload = () => {
             const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
+            const scaleFactor = 3; 
+            canvas.width = img.width * scaleFactor;
+            canvas.height = img.height * scaleFactor;
             const ctx = canvas.getContext("2d");
+            // Scale context
+            ctx.scale(scaleFactor, scaleFactor);
             ctx.drawImage(img, 0, 0);
             reportSections.push({ pngData: canvas.toDataURL("image/png") });
             URL.revokeObjectURL(url);

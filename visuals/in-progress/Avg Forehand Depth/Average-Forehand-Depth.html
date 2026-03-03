@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Average Forehand Depth</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #86ac91;
+            --panel: #f6faf7;
+            --ink: #16322d;
+            --muted: #4a6b64;
+            --line: #2e7d32;
+            --dot: #145a32;
+            --accent: #f9c74f;
+            --grid: #d5e2dc;
+            --card: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(180deg, #7fa786 0%, #6f9880 100%);
+            color: var(--ink);
+        }
+
+        .wrap {
+            max-width: 1700px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .title {
+            color: #f1fff7;
+            margin: 0 0 16px;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #e1f2e8;
+            margin: 0 0 24px;
+            font-size: 15px;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 430px minmax(760px, 1fr) 320px;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--panel);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .viz-panel {
+            height: 780px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            fill: var(--ink);
+        }
+
+        .axis text {
+            fill: var(--muted);
+            font-size: 12px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            stroke: #8ea79e;
+        }
+
+        .grid line {
+            stroke: var(--grid);
+            stroke-dasharray: 2 4;
+        }
+
+        .grid path {
+            stroke: none;
+        }
+
+        .metrics {
+            display: grid;
+            gap: 10px;
+        }
+
+        .metric-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #e2ece7;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            color: var(--ink);
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .metric-note {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 14px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .legend-swatch {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 6px;
+        }
+
+        .court-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: var(--ink);
+        }
+
+        .court-note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 10px;
+            line-height: 1.35;
+        }
+
+        .court-axis text {
+            fill: var(--muted);
+            font-size: 11px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .court-axis path,
+        .court-axis line {
+            stroke: #8ea79e;
+        }
+
+        @media (max-width: 1280px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1 class="title" id="title">Average Forehand Depth</h1>
+        <p class="subtitle" id="subtitle">Loading data...</p>
+        <div class="layout">
+            <div class="panel viz-panel">
+                <p class="court-title">Depth Reference Court</p>
+                <svg id="court" width="398" height="700"></svg>
+                <p class="court-note" id="court-note">Average depth marker updates from JSON.</p>
+            </div>
+            <div class="panel viz-panel">
+                <svg id="chart" width="820" height="700"></svg>
+                <div class="legend">
+                    <div><span class="legend-swatch" style="background:#d5ece0;"></span>Middle 50% depth range (IQR)</div>
+                    <div><span class="legend-swatch" style="background:#f9c74f;"></span>Median depth in match</div>
+                </div>
+            </div>
+            <div class="metrics panel" id="metrics"></div>
+        </div>
+    </div>
+
+    <script>
+        d3.json("../../../../data/json/avg_forehand_depth.json").then(function(data) {
+            const matches = data.matches;
+            const overall = data.overall;
+            const maxDepth = d3.max(matches, d => d.maxDepth);
+            const yDomainMax = Math.min(600, Math.max(500, maxDepth + 40));
+
+            d3.select("#title").text(`${data.player}: Average Forehand Depth`);
+            d3.select("#subtitle").text(data.metricDefinition);
+            d3.select("#court-note").text("Line marks overall average forehand depth from the net.");
+
+            const courtSvg = d3.select("#court");
+            const courtWidth = +courtSvg.attr("width");
+            const courtHeight = +courtSvg.attr("height");
+            const xCourt = d3.scaleLinear().domain([-350, 350]).range([0, courtWidth]);
+            const courtTopPad = 20;
+            const courtBottomPad = 8;
+            const yCourt = d3.scaleLinear()
+                .domain([-150, 600])
+                .range([courtHeight - courtBottomPad, courtTopPad]);
+
+            courtSvg.append("rect")
+                .attr("x", xCourt(-210))
+                .attr("y", yCourt(455))
+                .attr("width", xCourt(210) - xCourt(-210))
+                .attr("height", yCourt(-25) - yCourt(455))
+                .attr("fill", "#6092ce")
+                .attr("rx", 6);
+
+            const courtLines = [
+                { x1: 210, y1: -25, x2: 210, y2: 455 },
+                { x1: -210, y1: -25, x2: -210, y2: 455 },
+                { x1: 157.5, y1: -25, x2: 157.5, y2: 455 },
+                { x1: -157.5, y1: -25, x2: -157.5, y2: 455 },
+                { x1: 240, y1: 0, x2: -240, y2: 0, width: 6 },
+                { x1: 0, y1: -25, x2: 0, y2: 245 },
+                { x1: 157.5, y1: 245, x2: -157.5, y2: 245 },
+                { x1: 211.25, y1: 455, x2: -211.25, y2: 455 },
+                { x1: 0, y1: 445, x2: 0, y2: 455 }
+            ];
+
+            courtSvg.selectAll(".court-line")
+                .data(courtLines)
+                .enter()
+                .append("line")
+                .attr("class", "court-line")
+                .attr("x1", d => xCourt(d.x1))
+                .attr("y1", d => yCourt(d.y1))
+                .attr("x2", d => xCourt(d.x2))
+                .attr("y2", d => yCourt(d.y2))
+                .attr("stroke", "#ffffff")
+                .attr("stroke-width", d => d.width ? d.width : 3);
+
+            const netY = yCourt(0);
+            courtSvg.append("line")
+                .attr("x1", xCourt(218))
+                .attr("x2", xCourt(248))
+                .attr("y1", netY)
+                .attr("y2", netY)
+                .attr("stroke", "#ff6b35")
+                .attr("stroke-width", 3);
+
+            courtSvg.append("circle")
+                .attr("cx", xCourt(214))
+                .attr("cy", netY)
+                .attr("r", 3.5)
+                .attr("fill", "#ff6b35");
+
+            courtSvg.append("text")
+                .attr("x", xCourt(252))
+                .attr("y", netY + 4)
+                .attr("fill", "#ff6b35")
+                .attr("font-size", 11)
+                .attr("font-weight", 700)
+                .attr("text-anchor", "start")
+                .text("Net");
+
+            const yDepthCourt = d3.scaleLinear()
+                .domain([0, yDomainMax])
+                .range([yCourt(0), yCourt(yDomainMax)]);
+
+            const courtAxisX = xCourt(-255);
+            const courtTickValues = d3.range(0, 601, 100).filter(v => v <= yDomainMax);
+
+            courtSvg.append("g")
+                .attr("class", "court-axis")
+                .attr("transform", `translate(${courtAxisX},0)`)
+                .call(d3.axisLeft(yDepthCourt).tickValues(courtTickValues));
+
+            courtSvg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -(yCourt(yDomainMax) + (yCourt(0) - yCourt(yDomainMax)) / 2))
+                .attr("y", courtAxisX - 40)
+                .attr("text-anchor", "middle")
+                .attr("fill", "var(--muted)")
+                .attr("font-size", 11)
+                .attr("font-weight", 600)
+                .text("Depth of Y-Coordinate");
+
+            const avgDepth = overall.averageDepth;
+            const clampedAvgDepth = Math.max(0, Math.min(455, avgDepth));
+            const avgY = yCourt(clampedAvgDepth);
+
+            courtSvg.append("line")
+                .attr("x1", xCourt(-210))
+                .attr("x2", xCourt(210))
+                .attr("y1", avgY)
+                .attr("y2", avgY)
+                .attr("stroke", "#f94144")
+                .attr("stroke-width", 3)
+                .attr("stroke-dasharray", "6 4");
+
+            courtSvg.append("text")
+                .attr("x", xCourt(0))
+                .attr("y", avgY - 10)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#ffffff")
+                .attr("font-size", 12)
+                .attr("font-weight", 700)
+                .text(`Avg depth: ${avgDepth.toFixed(1)}`);
+
+            const svg = d3.select("#chart");
+            const width = +svg.attr("width");
+            const height = +svg.attr("height");
+            const margin = { top: 48, right: 36, bottom: 70, left: 70 };
+            const plotHeight = height - margin.top - margin.bottom;
+            const chartWidth = width - margin.left - margin.right;
+
+            const x = d3.scalePoint()
+                .domain(matches.map(d => d.matchId))
+                .range([margin.left, margin.left + chartWidth])
+                .padding(0.5);
+
+            const y = d3.scaleLinear()
+                .domain([0, yDomainMax])
+                .range([margin.top + plotHeight, margin.top])
+                .nice();
+
+            svg.append("text")
+                .attr("class", "chart-title")
+                .attr("x", margin.left)
+                .attr("y", 26)
+                .text("Forehand Depth Distribution for Match (Boxplot)");
+
+            svg.append("g")
+                .attr("class", "grid")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y).ticks(8).tickSize(-chartWidth).tickFormat(""));
+
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y).ticks(8));
+
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", `translate(0,${margin.top + plotHeight})`)
+                .call(d3.axisBottom(x));
+
+            svg.append("text")
+                .attr("x", margin.left + chartWidth / 2)
+                .attr("y", height - 18)
+                .attr("text-anchor", "middle")
+                .attr("fill", "var(--muted)")
+                .attr("font-size", 12)
+                .attr("font-weight", 600)
+                .text("Match");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -(margin.top + plotHeight / 2))
+                .attr("y", 18)
+                .attr("text-anchor", "middle")
+                .attr("fill", "var(--muted)")
+                .attr("font-size", 12)
+                .attr("font-weight", 600)
+                .text("Forehand Depth");
+
+            const boxWidth = 54;
+
+            matches.forEach(match => {
+                const sorted = [...match.depthValues].sort((a, b) => a - b);
+                const q1 = d3.quantileSorted(sorted, 0.25);
+                const median = d3.quantileSorted(sorted, 0.5);
+                const q3 = d3.quantileSorted(sorted, 0.75);
+                const iqr = q3 - q1;
+                const lowerFence = q1 - 1.5 * iqr;
+                const upperFence = q3 + 1.5 * iqr;
+                const inFence = sorted.filter(v => v >= lowerFence && v <= upperFence);
+                const whiskerMin = d3.min(inFence);
+                const whiskerMax = d3.max(inFence);
+                const xPos = x(match.matchId);
+
+                svg.append("line")
+                    .attr("x1", xPos)
+                    .attr("x2", xPos)
+                    .attr("y1", y(whiskerMin))
+                    .attr("y2", y(whiskerMax))
+                    .attr("stroke", "#5f7e73")
+                    .attr("stroke-width", 2);
+
+                svg.append("rect")
+                    .attr("x", xPos - boxWidth / 2)
+                    .attr("y", y(q3))
+                    .attr("width", boxWidth)
+                    .attr("height", y(q1) - y(q3))
+                    .attr("fill", "#d5ece0")
+                    .attr("stroke", "#2f6b57")
+                    .attr("stroke-width", 2)
+                    .attr("rx", 4);
+
+                svg.append("line")
+                    .attr("x1", xPos - boxWidth / 2)
+                    .attr("x2", xPos + boxWidth / 2)
+                    .attr("y1", y(median))
+                    .attr("y2", y(median))
+                    .attr("stroke", "var(--accent)")
+                    .attr("stroke-width", 3);
+
+                svg.append("line")
+                    .attr("x1", xPos - boxWidth / 3)
+                    .attr("x2", xPos + boxWidth / 3)
+                    .attr("y1", y(whiskerMin))
+                    .attr("y2", y(whiskerMin))
+                    .attr("stroke", "#5f7e73")
+                    .attr("stroke-width", 2);
+
+                svg.append("line")
+                    .attr("x1", xPos - boxWidth / 3)
+                    .attr("x2", xPos + boxWidth / 3)
+                    .attr("y1", y(whiskerMax))
+                    .attr("y2", y(whiskerMax))
+                    .attr("stroke", "#5f7e73")
+                    .attr("stroke-width", 2);
+            });
+
+            const allDepths = matches.flatMap(m => m.depthValues || []);
+            const shortCount = allDepths.filter(d => d >= 0 && d < 250).length;
+            const midCount = allDepths.filter(d => d >= 250 && d < 360).length;
+            const deepCount = allDepths.filter(d => d >= 360 && d <= 450).length;
+            const depthTotal = allDepths.length || 1;
+            const shortPct = ((shortCount / depthTotal) * 100).toFixed(1);
+            const midPct = ((midCount / depthTotal) * 100).toFixed(1);
+            const deepPct = ((deepCount / depthTotal) * 100).toFixed(1);
+
+            const cards = [
+                {
+                    label: "Overall Avg Depth",
+                    value: `${overall.averageDepth.toFixed(1)}`,
+                    note: `Across ${overall.totalForehands} forehands`
+                },
+                {
+                    label: "Short %",
+                    value: `${shortPct}%`,
+                    note: "Depth 0-250"
+                },
+                {
+                    label: "Mid %",
+                    value: `${midPct}%`,
+                    note: "Depth 250-360"
+                },
+                {
+                    label: "Deep %",
+                    value: `${deepPct}%`,
+                    note: "Depth 360-450"
+                },
+                {
+                    label: "Median Depth",
+                    value: `${overall.medianDepth.toFixed(1)}`,
+                    note: `Q1 ${overall.q1.toFixed(1)} | Q3 ${overall.q3.toFixed(1)}`
+                },
+                {
+                    label: "Depth IQR",
+                    value: `${overall.iqr.toFixed(1)}`,
+                    note: "Lower means tighter depth consistency"
+                }
+            ];
+
+            const metrics = d3.select("#metrics");
+            cards.forEach(card => {
+                const block = metrics.append("div").attr("class", "metric-card");
+                block.append("div").attr("class", "metric-label").text(card.label);
+                block.append("div").attr("class", "metric-value").text(card.value);
+                block.append("div").attr("class", "metric-note").text(card.note);
+            });
+        }).catch(function(error) {
+            console.error(error);
+            d3.select("#subtitle").text("Could not load avg_forehand_depth.json");
+        });
+    </script>
+</body>
+</html>

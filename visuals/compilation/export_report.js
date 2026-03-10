@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </html>
 `;
     // Create file name
-    const response = await fetch('../../../../data/json/match_summary.json');
+    const response = await fetch('../../data/json/match_summary.json');
     const matchData = await response.json();
     const dateFormatted = matchData.eventDate.replace(/\//g, "_");
     const htmlFilename = `${matchData.player1} vs ${matchData.player2} (${dateFormatted}).html`;

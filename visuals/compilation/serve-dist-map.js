@@ -1,4 +1,4 @@
-d3.json("../../../../data/json/serve_dist.json").then(function(data) {
+d3.json("../../data/json/serve_dist.json").then(function(data) {
 
     const width = 1000;
     const height = 800;

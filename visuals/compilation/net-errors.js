@@ -1,4 +1,4 @@
-d3.json("../../../../data/json/net_errors.json").then(function(net_errors) {
+d3.json("../../data/json/net_errors.json").then(function(net_errors) {
 
             const width = 1000;
             const height = 800;

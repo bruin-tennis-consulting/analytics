@@ -1,4 +1,4 @@
-d3.json("../../../../data/json/summary_stats.json").then(function(summary_stats) {
+d3.json("../../data/json/summary_stats.json").then(function(summary_stats) {
     const playerNames = Object.keys(summary_stats[0]).filter(name => name !== "Stat" && name !== "isProp" && name !== "isRallyStat");
     const nonRallyData = summary_stats.filter(d => d.isRallyStat === false);
     const rallyData = summary_stats.filter(d => d.isRallyStat === true && d.Stat !== "Average Rally Length");

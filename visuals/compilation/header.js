@@ -1,4 +1,4 @@
-d3.json("../../../../data/json/match_summary.json").then(function(data) {
+d3.json("../../data/json/match_summary.json").then(function(data) {
     const { player1, player2, setScores, eventDate, eventName, clientTeam, opponentTeam } = data;
 
     const setPairs = setScores.split(" ").map(s => s.split("-").map(Number));

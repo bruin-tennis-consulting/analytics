@@ -1,5 +1,5 @@
-d3.json("../../../../data/json/serve_error.json").then(function(serve_errors) {
-  d3.json("../../../../data/json/serve_error_dist.json").then(function(serve_errorDist) {
+d3.json("../../data/json/serve_error.json").then(function(serve_errors) {
+  d3.json("../../data/json/serve_error_dist.json").then(function(serve_errorDist) {
 
     const width = 1000;
     const height = 800;

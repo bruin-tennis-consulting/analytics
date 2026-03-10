@@ -15,7 +15,7 @@ const yScale = d3.scaleLinear()
     .range([height - margin.bottom, margin.top]);
 
     // Load the data from the JSON file
-    d3.json("../../../../data/json/rally_length.json").then(data => {
+    d3.json("../../data/json/rally_length.json").then(data => {
       // Set the domain for the x and y scales
       xScale.domain(data.map(d => d.combinedScore));
       yScale.domain([0, d3.max(data, d => d.max_rally)]);

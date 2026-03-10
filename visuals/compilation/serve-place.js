@@ -1,5 +1,5 @@
-d3.json("../../../../data/json/serve_place.json").then(function(serves_ucla) {
-    d3.json("../../../../data/json/serve_place_labels.json").then(function(labels) {
+d3.json("../../data/json/serve_place.json").then(function(serves_ucla) {
+    d3.json("../../data/json/serve_place_labels.json").then(function(labels) {
 
         const width = 1000;
         const height = 800;

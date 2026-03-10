@@ -1,4 +1,4 @@
-d3.json("../../../data/json/winners.json").then(function(winners) {
+d3.json("../../data/json/winners.json").then(function(winners) {
 
     const width = 1000;
     const height = 800;

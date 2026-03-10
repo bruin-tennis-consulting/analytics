@@ -1,5 +1,5 @@
-d3.json("../../../../data/json/ret_contact.json").then(function(returns_ucla) {
-    d3.json("../../../../data/json/ret_contact_dist.json").then(function(distribution) {
+d3.json("../../data/json/ret_contact.json").then(function(returns_ucla) {
+    d3.json("../../data/json/ret_contact_dist.json").then(function(distribution) {
 
         const width = 1000;
         const height = 800;

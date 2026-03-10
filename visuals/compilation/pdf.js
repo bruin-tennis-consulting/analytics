@@ -7,7 +7,7 @@ document.getElementById("save-all-sections").addEventListener("click", async () 
     const cropPercent = 0.1; // crop 10% from each side
 
     // Dynamic file name from loaded json
-    const response = await fetch('../../../../data/json/match_summary.json');
+    const response = await fetch('../../data/json/match_summary.json');
     const matchData = await response.json();
     const dateFormatted = matchData.eventDate.replace(/\//g, "_");
     const pdfFilename = `${matchData.player1} vs ${matchData.player2} (${dateFormatted}).pdf`;
